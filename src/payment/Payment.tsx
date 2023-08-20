@@ -1,39 +1,30 @@
-import { useEffect, useState } from "react";
+import { useRoundUp } from "./useRoundUp";
+import { PaymentMethods } from "./PaymentMethods";
+import { formatCheckboxLabel } from "./utils";
 
-export const Payment = ({ amount = 0 }: { amount?: number }) => {
-  const [shouldRoundUp, setRoundUp] = useState<boolean>(false);
-  const [total, setTotal] = useState<number>(amount);
-  const [tip, setTip] = useState<number>(0);
+type PaymentProps = {
+  amount: number;
+  methods?: string[];
+};
 
-  useEffect(() => {
-    if (shouldRoundUp) {
-      setTotal(Math.floor(amount + 1));
-    } else {
-      setTotal(amount);
-    }
-    setTip(parseFloat((Math.floor(amount + 1) - amount).toPrecision(10)));
-  }, [amount, shouldRoundUp]);
-
-  const handleChange = () => {
-    setRoundUp((shouldRoundUp) => !shouldRoundUp);
-  };
+export const Payment = ({ amount = 0, methods = [] }: PaymentProps) => {
+  const { agreeToDonate, total, tip, updateAgreeToDonate } = useRoundUp(amount);
 
   return (
-    <div>
-      <h4>Payment</h4>
-      <label>
-        <input
-          type="checkbox"
-          checked={shouldRoundUp}
-          onChange={handleChange}
-        />
-        <span>
-          {shouldRoundUp
-            ? "Thanks for your donation!"
-            : `I'd like to donate $${tip} to charity`}
-        </span>
-      </label>
-      <button>${total}</button>
+    <div className="container">
+      <h3>Payment</h3>
+      <PaymentMethods methods={methods} />
+      <div className="donation">
+        <label>
+          <input
+            type="checkbox"
+            checked={agreeToDonate}
+            onChange={updateAgreeToDonate}
+          />
+          <span>{formatCheckboxLabel(agreeToDonate, tip)}</span>
+        </label>
+      </div>
+      <button className="payment-button">${total}</button>
     </div>
   );
 };
